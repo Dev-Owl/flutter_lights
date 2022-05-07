@@ -7,14 +7,16 @@ import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/gun.dart';
 import 'package:lights/game/components/obstacle.dart';
 import 'package:lights/game/components/player.dart';
+import 'package:lights/game/components/screen.dart';
 
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
-  final Paint shaderPaint;
+  final FragmentProgram shaderProgram;
+  final Image lightImage;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
 
-  LightsGame(this.shaderPaint)
+  LightsGame(this.shaderProgram, this.lightImage)
       : super(
           gravity: Vector2.zero(),
         );
@@ -31,6 +33,7 @@ class LightsGame extends Forge2DGame
     await add(player);
 
     await add(GunComponent(player));
+    await add(ScreenComponent());
     await add(EnemyComponent.spawn(
         spawnPoint: Vector2(-10, 0), playerComponent: player));
     addContactCallback(BulletObstacleContctCallback());

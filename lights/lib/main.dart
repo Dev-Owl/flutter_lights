@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
@@ -7,22 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lights/game/game.dart';
 
+Future<ui.Image> getUiImage(
+    String imageAssetPath, int height, int width) async {
+  final ByteData assetImageByteData = await rootBundle.load(imageAssetPath);
+  final codec = await ui.instantiateImageCodec(
+    assetImageByteData.buffer.asUint8List(),
+    targetHeight: height,
+    targetWidth: width,
+  );
+  final image = (await codec.getNextFrame()).image;
+  return image;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the shaders
-  final program = await FragmentProgram.compile(
+  final lightImage = await getUiImage('assets/textures/light.png', 1024, 1024);
+  final program = await ui.FragmentProgram.compile(
     spirv: (await rootBundle.load('assets/shaders/lighting.frag.spv')).buffer,
   );
 
-  // Turn it into a shader with given inputs (floatUniforms).
-  final shader = program.shader(
-    floatUniforms: Float32List.fromList(<double>[1]),
-  );
-  final paint = Paint()..shader = shader;
-
   await Flame.device.fullScreen();
-  final game = LightsGame(paint);
+  final game = LightsGame(program, lightImage);
   runApp(MaterialApp(
     home: GameWidget(
       game: game,
