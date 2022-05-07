@@ -120,10 +120,11 @@ float sceneDist(vec2 p)
     vec4 box0=getBox(0.);
     float m=boxDist(translate(p,box0.xy),box0.zw,0.);
     float boxCount=boxCount();
-    for(float i=1.;i<4.;i++){
-        if(i>=boxCount)break;
-        vec4 box=getBox(i);
-        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+    for(float i=1.;i<=2.;i++){
+        if(i<boxCount){
+            vec4 box=getBox(i);
+            m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+        }
     }
     return m;
 }
