@@ -45,7 +45,7 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
     // y - increment between 0 and 255
     // z - the remainder between 0 and 255
     // so the resulting number is (x * 256) + (y * 256) + z
-    final valueInt = (value * 256.0).toInt();
+    final valueInt = (value * 10.0).toInt();
     final increment = valueInt ~/ 256;
     final remainder = valueInt - (increment * 256);
     final x = increment > 255 ? 255 : increment;

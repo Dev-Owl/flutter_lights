@@ -24,17 +24,18 @@ class LightsGame extends Forge2DGame
   LightsGame(this.shaderProgram, this.lightImage)
       : super(
           gravity: Vector2.zero(),
+          zoom: 2.0,
         );
 
   @override
   Future<void>? onLoad() async {
     player = PlayerComponent();
     await add(
-        ObstacleComponent(position: Vector2(10, 10), size: Vector2.all(1)));
+        ObstacleComponent(position: Vector2(50, 100), size: Vector2.all(20)));
     await add(
-        ObstacleComponent(position: Vector2(20, 10), size: Vector2.all(1)));
+        ObstacleComponent(position: Vector2(100, 100), size: Vector2.all(20)));
     await add(
-        ObstacleComponent(position: Vector2(30, 10), size: Vector2.all(1)));
+        ObstacleComponent(position: Vector2(150, 100), size: Vector2.all(20)));
     await add(player);
 
     await add(GunComponent(player));
