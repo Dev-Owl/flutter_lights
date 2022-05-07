@@ -17,7 +17,7 @@ class GunComponent extends PositionComponent with HasGameRef<LightsGame> {
   @override
   void update(double dt) {
     final nextPosition = _gunPosition();
-    final angleToMouse = nextPosition.angleTo(gameRef.mousPosition);
+    final angleToMouse = nextPosition.angleTo(gameRef.mousePosition);
 
     position = nextPosition;
     angle = angleToMouse;

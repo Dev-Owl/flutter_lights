@@ -8,7 +8,7 @@ import 'package:lights/game/components/player.dart';
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
   late final PlayerComponent player;
-  Vector2 mousPosition = Vector2.zero();
+  Vector2 mousePosition = Vector2.zero();
 
   LightsGame()
       : super(
@@ -35,7 +35,7 @@ class LightsGame extends Forge2DGame
 
   @override
   void onMouseMove(PointerHoverInfo info) {
-    mousPosition = info.eventPosition.game;
+    mousePosition = info.eventPosition.game;
     super.onMouseMove(info);
   }
 

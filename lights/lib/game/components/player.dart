@@ -45,7 +45,9 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
         desiredValueY += speed;
       }
     }
-    final movement = Vector2(desiredValueX, desiredValueY);
+    final movement = Vector2(desiredValueX, desiredValueY)
+        .normalized()
+        .scaled(speed.toDouble());
     impulse = (movement - vel).scaled(body.mass);
     body.applyLinearImpulse(impulse);
     return true;
@@ -58,10 +60,10 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
 
   void fire() {
     final spawnPoint = body.position.clone();
-    final heading = (gameRef.mousPosition - spawnPoint);
+    final heading = (gameRef.mousePosition - spawnPoint);
     heading.normalize();
     debugPrint(heading.toString());
-    final bullet = BulletComponent.spaw(
+    final bullet = BulletComponent.spawn(
       position: spawnPoint,
       heading: heading,
     );
