@@ -17,6 +17,7 @@ class LightsGame extends Forge2DGame
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
   LightState lightState = LightState();
+  int? mouseLight;
 
   double enemySapwnIntervall = 2;
   double enemySapwnTime = 0;
@@ -43,12 +44,15 @@ class LightsGame extends Forge2DGame
     addContactCallback(BulletObstacleContctCallback());
     addContactCallback(BulletEnemyContctCallback());
     addContactCallback(BulletPlayerContctCallback());
+
     return super.onLoad();
   }
 
   @override
   void onMouseMove(PointerHoverInfo info) {
     mousePosition = info.eventPosition.game;
+    mouseLight ??= lightState.addLight(Light(mousePosition));
+    lightState.updateLight(mouseLight!, Light(mousePosition));
     super.onMouseMove(info);
   }
 

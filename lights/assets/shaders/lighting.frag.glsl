@@ -64,12 +64,16 @@ vec2 getLight(float offset,float index){
 void main(){
     fragColor=vec4(0.,0.,0.,0.);
     vec2 position=gl_FragCoord.xy;
+    float currentCell=0.;
     
     // boxes
     float obscurerCount=getNumber(0.);
+    currentCell+=1.;
+    float boxOffset=currentCell;
     for(float i=0.;i<256.;i++){
         if(i<obscurerCount){
-            vec4 box=getBox(1.,i);
+            vec4 box=getBox(boxOffset,i);
+            currentCell+=4.;
             if(position.x>=box.x-box.z){
                 if(position.x<=box.x+box.z){
                     if(position.y>=box.y-box.w){
@@ -83,4 +87,22 @@ void main(){
     }
     
     // lights
+    float lightsCount=getNumber(currentCell);
+    currentCell+=1.;
+    float lightOffset=currentCell;
+    for(float i=0.;i<10.;i++){
+        if(i<lightsCount){
+            vec2 light=getLight(lightOffset,i);
+            currentCell+=2.;
+            if(position.x>=light.x-.5){
+                if(position.x<=light.x+.5){
+                    if(position.y>=light.y-.5){
+                        if(position.y<=light.y+.5){
+                            fragColor=vec4(1.,1.,0.,1.);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

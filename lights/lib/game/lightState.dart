@@ -7,28 +7,36 @@ class LightState {
   HashMap<int, LightObscurerBox> boxes = HashMap<int, LightObscurerBox>();
   HashMap<int, Light> lights = HashMap<int, Light>();
 
-  int add(LightObscurerBox box) {
+  // Boxes
+  int addBox(LightObscurerBox box) {
     final id = nextId;
     nextId++;
     boxes[id] = box;
     return id;
   }
 
-  void remove(int id) {
+  void removeBox(int id) {
     boxes.remove(id);
   }
 
-  void update(int id, LightObscurerBox box) {
+  void updateBox(int id, LightObscurerBox box) {
     boxes[id] = box;
   }
 
-  List<double> encodeFloats() {
-    final list = <double>[];
-    list.add(boxes.values.length.toDouble());
-    for (final box in boxes.values) {
-      list.addAll(box.encodeFloats());
-    }
-    return list;
+  // Lights
+  int addLight(Light light) {
+    final id = nextId;
+    nextId++;
+    lights[id] = light;
+    return id;
+  }
+
+  void removeLight(int id) {
+    lights.remove(id);
+  }
+
+  void updateLight(int id, Light light) {
+    lights[id] = light;
   }
 }
 
@@ -37,10 +45,6 @@ class LightObscurerBox {
   final Vector2 size;
 
   LightObscurerBox(this.position, this.size);
-
-  List<double> encodeFloats() {
-    return [position.x, position.y, size.x, size.y];
-  }
 }
 
 class Light {

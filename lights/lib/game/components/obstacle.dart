@@ -19,7 +19,7 @@ class ObstacleComponent extends BodyComponent {
   @override
   Future<void> onLoad() async {
     game = gameRef as LightsGame;
-    obscurerId = game.lightState.add(LightObscurerBox(position, size));
+    obscurerId = game.lightState.addBox(LightObscurerBox(position, size));
     super.onLoad();
   }
 

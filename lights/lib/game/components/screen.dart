@@ -72,18 +72,30 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
     ByteData bytes = ByteData(width * height * 4);
 
     // write data to the texture
+    var currentCell = 0;
     var lightState = gameRef.lightState;
     var obscurerCount = lightState.boxes.length;
     // write count to the texture
-    writeNumber(bytes, 0, obscurerCount.toDouble());
+    writeNumber(bytes, currentCell, obscurerCount.toDouble());
+    currentCell++;
     // write obscurer data to the texture
     for (int i = 0; i < obscurerCount; i++) {
-      var box = lightState.boxes[i];
-      var offsetIndex = i * 4 + 1;
-      writeNumber(bytes, offsetIndex, box!.position.x);
-      writeNumber(bytes, offsetIndex + 1, box.position.y);
-      writeNumber(bytes, offsetIndex + 2, box.size.x);
-      writeNumber(bytes, offsetIndex + 3, box.size.y);
+      var box = lightState.boxes.values.toList()[i];
+      writeNumber(bytes, currentCell, box.position.x);
+      writeNumber(bytes, currentCell + 1, box.position.y);
+      writeNumber(bytes, currentCell + 2, box.size.x);
+      writeNumber(bytes, currentCell + 3, box.size.y);
+      currentCell += 4;
+    }
+    // write the light data to the texture
+    var lightCount = lightState.lights.length;
+    writeNumber(bytes, currentCell, lightCount.toDouble());
+    currentCell++;
+    for (int i = 0; i < lightCount; i++) {
+      var light = lightState.lights.values.toList()[i];
+      writeNumber(bytes, currentCell, light.position.x);
+      writeNumber(bytes, currentCell + 1, light.position.y);
+      currentCell += 2;
     }
 
     return ui.decodeImageFromPixels(
