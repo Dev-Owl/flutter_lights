@@ -31,6 +31,8 @@ class LightsGame extends Forge2DGame
     await add(EnemyComponent.spawn(
         spawnPoint: Vector2(-10, 0), playerComponent: player));
     addContactCallback(BulletObstacleContctCallback());
+    addContactCallback(BulletEnemyContctCallback());
+    addContactCallback(BulletPlayerContctCallback());
     return super.onLoad();
   }
 
