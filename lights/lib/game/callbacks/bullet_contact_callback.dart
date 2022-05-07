@@ -43,5 +43,10 @@ class BulletObstacleContctCallback
   ) {
     contact.setEnabled(false);
     a.removeFromParent();
+    final worldContact = WorldManifold();
+    contact.getWorldManifold(worldContact);
+
+    b.impact(
+        a.body.linearVelocity, worldContact.points.first, worldContact.normal);
   }
 }
