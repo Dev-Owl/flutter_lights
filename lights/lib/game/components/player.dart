@@ -1,8 +1,11 @@
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lights/game/components/bullet.dart';
+import 'package:lights/game/game.dart';
 
-class PlayerComponent extends BodyComponent with KeyboardHandler {
+class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
   /// Create body for our player
   @override
   Body createBody() {
@@ -51,5 +54,17 @@ class PlayerComponent extends BodyComponent with KeyboardHandler {
   @override
   void update(double dt) {
     super.update(dt);
+  }
+
+  void fire() {
+    final spawnPoint = body.position.clone();
+    final heading = (gameRef.mousPosition - spawnPoint);
+    heading.normalize();
+    debugPrint(heading.toString());
+    final bullet = BulletComponent.spaw(
+      position: spawnPoint,
+      heading: heading,
+    );
+    gameRef.add(bullet);
   }
 }
