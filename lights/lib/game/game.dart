@@ -8,6 +8,7 @@ import 'package:lights/game/components/gun.dart';
 import 'package:lights/game/components/obstacle.dart';
 import 'package:lights/game/components/player.dart';
 import 'package:lights/game/components/screen.dart';
+import 'package:lights/game/lightState.dart';
 
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
@@ -15,6 +16,7 @@ class LightsGame extends Forge2DGame
   final Image lightImage;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
+  LightState lightState = LightState();
 
   double enemySapwnIntervall = 2;
   double enemySapwnTime = 0;

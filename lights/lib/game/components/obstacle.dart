@@ -5,12 +5,23 @@ import 'package:flame/particles.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flame/particles.dart' as flame;
 import 'package:flutter/material.dart';
+import 'package:lights/game/game.dart';
+import 'package:lights/game/lightState.dart';
 
 class ObstacleComponent extends BodyComponent {
   final Vector2 position;
   final Vector2 size;
+  late LightsGame game;
+  late int obscurerId;
 
   ObstacleComponent({required this.position, required this.size});
+
+  @override
+  Future<void> onLoad() async {
+    game = gameRef as LightsGame;
+    obscurerId = game.lightState.add(LightObscurerBox(position, size));
+    super.onLoad();
+  }
 
   @override
   Body createBody() {
