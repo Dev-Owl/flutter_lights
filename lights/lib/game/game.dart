@@ -13,7 +13,8 @@ class LightsGame extends Forge2DGame
   final Paint shaderPaint;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
-
+  double enemySapwnIntervall = 2;
+  double enemySapwnTime = 0;
   LightsGame(this.shaderPaint)
       : super(
           gravity: Vector2.zero(),
@@ -48,5 +49,17 @@ class LightsGame extends Forge2DGame
   @override
   void onTapDown(TapDownInfo info) {
     player.fire();
+  }
+
+  @override
+  void update(double dt) {
+    enemySapwnTime += dt;
+    if (enemySapwnIntervall <= enemySapwnTime) {
+      add(EnemyComponent.spawn(
+          spawnPoint: Vector2(-10, 0), playerComponent: player));
+
+      enemySapwnTime = 0;
+    }
+    super.update(dt);
   }
 }

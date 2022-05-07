@@ -1,3 +1,4 @@
+import 'package:flame/extensions.dart';
 import 'package:flame/palette.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
@@ -36,5 +37,15 @@ class BulletComponent extends BodyComponent {
     final impulse = heading * 35 * body.mass;
     body.applyLinearImpulse(impulse);
     super.onMount();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final rect = Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y);
+
+    if (rect.containsPoint(body.position) == false) {
+      removeFromParent();
+    }
   }
 }
