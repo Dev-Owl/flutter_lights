@@ -1,5 +1,10 @@
+import 'dart:math';
+
+import 'package:flame/components.dart';
 import 'package:flame/palette.dart';
+import 'package:flame/particles.dart' as flame;
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 import 'package:lights/game/components/player.dart';
 
 class EnemyComponent extends BodyComponent {
@@ -38,5 +43,28 @@ class EnemyComponent extends BodyComponent {
     velChange.scale(body.mass);
     body.applyLinearImpulse(velChange);
     super.update(dt);
+  }
+
+  final rnd = Random();
+
+  Vector2 randomVector2() => (Vector2.random(rnd) - Vector2.random(rnd)) * 200;
+  @override
+  void onRemove() {
+    gameRef.add(
+      ParticleSystemComponent(
+        position: body.position,
+        particle: flame.Particle.generate(
+          count: 25,
+          generator: (i) => flame.AcceleratedParticle(
+            acceleration: randomVector2(),
+            child: flame.CircleParticle(
+              radius: 0.1,
+              paint: Paint()..color = Colors.red,
+            ),
+          ),
+        ),
+      ),
+    );
+    super.onRemove();
   }
 }
