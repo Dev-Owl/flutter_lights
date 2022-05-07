@@ -111,14 +111,6 @@ float fillMask(float dist)
     return clamp(-dist,0.,1.);
 }
 
-float innerBorderMask(float dist,float width)
-{
-    //dist += 1.0;
-    float alpha1=clamp(dist+width,0.,1.);
-    float alpha2=clamp(dist,0.,1.);
-    return alpha1-alpha2;
-}
-
 ///////////////
 // The scene //
 ///////////////
@@ -128,9 +120,10 @@ float sceneDist(vec2 p)
     vec4 box0=getBox(0.);
     float m=boxDist(translate(p,box0.xy),box0.zw,0.);
     float boxCount=boxCount();
-    if(boxCount>1.){
-        vec4 box1=getBox(1.);
-        m=merge(m,boxDist(translate(p,box1.xy),box1.zw,0.));
+    for(float i=1.;i<4.;i++){
+        if(i>=boxCount)break;
+        vec4 box=getBox(i);
+        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
     }
     return m;
 }

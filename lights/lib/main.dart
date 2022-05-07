@@ -25,6 +25,7 @@ void main() async {
   final lightImage = await getUiImage('assets/textures/light.png', 1024, 1024);
   final program = await ui.FragmentProgram.compile(
     spirv: (await rootBundle.load('assets/shaders/lighting.frag.spv')).buffer,
+    debugPrint: true,
   );
 
   await Flame.device.fullScreen();
