@@ -24,6 +24,7 @@ class BulletComponent extends BodyComponent {
     final bodyDef = BodyDef()
       ..position = position
       ..type = BodyType.dynamic
+      ..bullet = true
       ..userData = this;
     final body = world.createBody(bodyDef)..createFixture(fixtureDef);
 
@@ -32,7 +33,7 @@ class BulletComponent extends BodyComponent {
 
   @override
   void onMount() {
-    final impulse = heading * 10 * body.mass;
+    final impulse = heading * 35 * body.mass;
     body.applyLinearImpulse(impulse);
     super.onMount();
   }
