@@ -47,7 +47,7 @@ class EnemyComponent extends BodyComponent {
 
   final rnd = Random();
 
-  Vector2 randomVector2() => (Vector2.random(rnd) - Vector2.random(rnd)) * 200;
+  Vector2 randomVector2() => (Vector2.random(rnd) - Vector2.random(rnd)) * 20;
   @override
   void onRemove() {
     gameRef.add(
