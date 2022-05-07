@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:lights/game/callbacks/bullet_contact_callback.dart';
@@ -8,10 +10,11 @@ import 'package:lights/game/components/player.dart';
 
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
+  final Paint shaderPaint;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
 
-  LightsGame()
+  LightsGame(this.shaderPaint)
       : super(
           gravity: Vector2.zero(),
         );
