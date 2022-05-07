@@ -1,5 +1,6 @@
 import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:lights/game/callbacks/bullet_contact_callback.dart';
 import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/gun.dart';
 import 'package:lights/game/components/obstacle.dart';
@@ -29,7 +30,7 @@ class LightsGame extends Forge2DGame
     await add(GunComponent(player));
     await add(EnemyComponent.spawn(
         spawnPoint: Vector2(-10, 0), playerComponent: player));
-
+    addContactCallback(BulletObstacleContctCallback());
     return super.onLoad();
   }
 

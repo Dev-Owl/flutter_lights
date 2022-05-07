@@ -31,18 +31,23 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
     var desiredValueY = .0;
     const speed = 10;
     final vel = body.linearVelocity;
+    var handled = false;
     if (keysPressed.isNotEmpty) {
       if (keysPressed.contains(LogicalKeyboardKey.keyD)) {
         desiredValueX += speed;
+        handled = true;
       }
       if (keysPressed.contains(LogicalKeyboardKey.keyA)) {
         desiredValueX -= speed;
+        handled = true;
       }
       if (keysPressed.contains(LogicalKeyboardKey.keyW)) {
         desiredValueY -= speed;
+        handled = true;
       }
       if (keysPressed.contains(LogicalKeyboardKey.keyS)) {
         desiredValueY += speed;
+        handled = true;
       }
     }
     final movement = Vector2(desiredValueX, desiredValueY)
@@ -50,7 +55,7 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
         .scaled(speed.toDouble());
     impulse = (movement - vel).scaled(body.mass);
     body.applyLinearImpulse(impulse);
-    return true;
+    return !handled;
   }
 
   @override
