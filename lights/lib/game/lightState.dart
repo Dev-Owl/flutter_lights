@@ -5,6 +5,7 @@ import 'package:flame/extensions.dart';
 class LightState {
   int nextId = 0;
   HashMap<int, LightObscurerBox> boxes = HashMap<int, LightObscurerBox>();
+  HashMap<int, Light> lights = HashMap<int, Light>();
 
   int add(LightObscurerBox box) {
     final id = nextId;
@@ -40,4 +41,10 @@ class LightObscurerBox {
   List<double> encodeFloats() {
     return [position.x, position.y, size.x, size.y];
   }
+}
+
+class Light {
+  final Vector2 position;
+
+  Light(this.position);
 }
