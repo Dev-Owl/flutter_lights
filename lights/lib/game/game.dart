@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/input.dart';
@@ -8,7 +9,7 @@ import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/gun.dart';
 import 'package:lights/game/components/obstacle.dart';
 import 'package:lights/game/components/player.dart';
-import 'package:lights/game/components/screen.dart';
+import 'package:lights/game/components/lighting.dart';
 import 'package:lights/game/lightState.dart';
 
 class LightsGame extends Forge2DGame
@@ -20,7 +21,7 @@ class LightsGame extends Forge2DGame
   int? mouseLight;
 
   double enemySapwnIntervall = 2;
-  double enemySapwnTime = 0;
+  double enemySpawnTime = 0;
   LightsGame(this.shaderProgram)
       : super(
           gravity: Vector2.zero(),
@@ -30,16 +31,24 @@ class LightsGame extends Forge2DGame
   @override
   Future<void>? onLoad() async {
     player = PlayerComponent();
-    await add(
-        ObstacleComponent(position: Vector2(50, 100), size: Vector2.all(20)));
-    await add(
-        ObstacleComponent(position: Vector2(100, 100), size: Vector2.all(20)));
-    await add(
-        ObstacleComponent(position: Vector2(150, 100), size: Vector2.all(20)));
+    await add(LightingComponent());
+    // await add(
+    //     ObstacleComponent(position: Vector2(50, 100), size: Vector2.all(20)));
+
+    var obstacles = 40;
+    // spawn random obstacles around the map
+    var rnd = Random();
+    for (var i = 0; i < obstacles; i++) {
+      var x = rnd.nextDouble() * size.x;
+      var y = rnd.nextDouble() * size.y;
+
+      var boxSize = Vector2(rnd.nextDouble() * 20, rnd.nextDouble() * 20);
+      await add(ObstacleComponent(position: Vector2(x, y), size: boxSize));
+    }
+
     await add(player);
 
     await add(GunComponent(player));
-    await add(ScreenComponent());
     await add(EnemyComponent.spawn(
         spawnPoint: Vector2(-10, 0), playerComponent: player));
     addContactCallback(BulletObstacleContctCallback());
@@ -52,10 +61,10 @@ class LightsGame extends Forge2DGame
   @override
   void onMouseMove(PointerHoverInfo info) {
     mousePosition = info.eventPosition.game;
-    mouseLight ??=
-        lightState.addLight(Light(mousePosition, Colors.blue.shade900, 150, 5));
-    lightState.updateLight(
-        mouseLight!, Light(mousePosition, Colors.blue.shade900, 150, 5));
+    // mouseLight ??=
+    //     lightState.addLight(Light(mousePosition, Colors.white, 150, 5));
+    // lightState.updateLight(
+    //     mouseLight!, Light(mousePosition, Colors.white, 150, 5));
     super.onMouseMove(info);
   }
 
@@ -66,12 +75,12 @@ class LightsGame extends Forge2DGame
 
   @override
   void update(double dt) {
-    enemySapwnTime += dt;
-    if (enemySapwnIntervall <= enemySapwnTime) {
+    enemySpawnTime += dt;
+    if (enemySapwnIntervall <= enemySpawnTime) {
       add(EnemyComponent.spawn(
           spawnPoint: Vector2(-10, 0), playerComponent: player));
 
-      enemySapwnTime = 0;
+      enemySpawnTime = 0;
     }
     super.update(dt);
   }

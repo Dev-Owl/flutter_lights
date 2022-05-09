@@ -4,15 +4,15 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/image_composition.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:lights/game/components/player.dart';
 import 'package:lights/game/game.dart';
 
-class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
-  Paint shaderPaint = Paint();
-  late Image dataImage;
+class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
+  late ui.Image dataImage;
 
-  ScreenComponent();
+  LightingComponent();
 
   @override
   Future<void>? onLoad() {
@@ -25,17 +25,15 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
 
   @override
   void update(double dt) {
-    shaderPaint = generatePaint();
     generateDataImage((image) {
       dataImage = image;
     });
     super.update(dt);
   }
 
-  @override
-  void render(Canvas canvas) {
-    canvas.drawRect(
-        Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), shaderPaint);
+  bool circleIntersectsPoint(Vector2 position, double radius, Vector2 point) {
+    final distance = (position - point).length;
+    return distance < radius;
   }
 
   List<int> encodeNumber(double value) {
@@ -65,7 +63,7 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
     data.setUint8(byteOffset + 2, encoded[2]);
   }
 
-  void generateDataImage(void Function(Image) callback) {
+  void generateDataImage(void Function(ui.Image) callback) {
     var width = 1024;
     var height = 1024;
     ByteData bytes = ByteData(width * height * 4);
@@ -112,24 +110,82 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
     );
   }
 
-  Paint generatePaint() {
-    var uniformFloats = <double>[];
+  @override
+  void render(Canvas canvas) {
     final resolution = Vector2(gameRef.size.x, gameRef.size.y);
-    uniformFloats.add(resolution.x);
-    uniformFloats.add(resolution.y);
-    // data texture size
-    uniformFloats.add(1024.0);
-    uniformFloats.add(1024.0);
 
-    final shader = gameRef.shaderProgram.shader(
-      floatUniforms: Float32List.fromList(uniformFloats),
-      samplerUniforms: <ImageShader>[
-        ImageShader(dataImage, TileMode.repeated, TileMode.repeated,
-            Matrix4.identity().storage),
-      ],
-    );
-    final paint = Paint()..shader = shader;
-    paint.blendMode = BlendMode.lighten;
-    return paint;
+    // ambient lighting
+    var ambientPaint = Paint()
+      ..color = Colors.white12
+      ..blendMode = ui.BlendMode.src;
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), ambientPaint);
+
+    double currentLightIndex = 0;
+    for (var lightKeyValue in gameRef.lightState.lights.entries) {
+      var uniformFloats = <double>[];
+      uniformFloats.add(resolution.x);
+      uniformFloats.add(resolution.y);
+      // data texture size
+      uniformFloats.add(1024.0);
+      uniformFloats.add(1024.0);
+      // light index to draw
+      uniformFloats.add(currentLightIndex);
+      // find boxes which intersect the light's circle (position and range)
+      final light = lightKeyValue.value;
+      final lightRange = light.range;
+      final lightPosition = light.position;
+
+      double currentBoxIndex = 0;
+      List<double> intersectingBoxes = [];
+      for (var boxKeyValue in gameRef.lightState.boxes.entries) {
+        // check all four couners for intersections
+        var box = boxKeyValue.value;
+        var boxPosition = box.position;
+        var boxSize = box.size;
+        var boxTopLeft = boxPosition - boxSize / 2;
+        var boxTopRight = boxPosition + Vector2(boxSize.x, 0) - boxSize / 2;
+        var boxBottomLeft = boxPosition + Vector2(0, boxSize.y) - boxSize / 2;
+        var boxBottomRight = boxPosition + boxSize - boxSize / 2;
+
+        if (circleIntersectsPoint(lightPosition, lightRange, boxTopLeft)) {
+          intersectingBoxes.add(currentBoxIndex);
+        } else if (circleIntersectsPoint(
+            lightPosition, lightRange, boxTopRight)) {
+          intersectingBoxes.add(currentBoxIndex);
+        } else if (circleIntersectsPoint(
+            lightPosition, lightRange, boxBottomLeft)) {
+          intersectingBoxes.add(currentBoxIndex);
+        } else if (circleIntersectsPoint(
+            lightPosition, lightRange, boxBottomRight)) {
+          intersectingBoxes.add(currentBoxIndex);
+        }
+
+        currentBoxIndex++;
+      }
+
+      // take first three and add to uniform floats
+      // place -1 if not enough to fill all 3 slots
+      for (var i = 0; i < 3; i++) {
+        if (i < intersectingBoxes.length) {
+          uniformFloats.add(intersectingBoxes[i]);
+        } else {
+          uniformFloats.add(-1.0);
+        }
+      }
+
+      final shader = gameRef.shaderProgram.shader(
+        floatUniforms: Float32List.fromList(uniformFloats),
+        samplerUniforms: <ImageShader>[
+          ImageShader(dataImage, TileMode.repeated, TileMode.repeated,
+              Matrix4.identity().storage),
+        ],
+      );
+      final paint = Paint()..shader = shader;
+      paint.blendMode = BlendMode.plus;
+      canvas.drawRect(
+          Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), paint);
+      currentLightIndex++;
+    }
   }
 }

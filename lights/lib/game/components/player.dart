@@ -5,7 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:lights/game/components/bullet.dart';
 import 'package:lights/game/game.dart';
 
+import '../lightState.dart';
+
 class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
+  int playerLight = -1;
+
   /// Create body for our player
   @override
   Body createBody() {
@@ -20,6 +24,11 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
       ..position = Vector2.all(50)
       ..type = BodyType.dynamic
       ..userData = this;
+
+    paint = Paint()
+      ..color = Colors.orange
+      ..blendMode = BlendMode.overlay;
+
     return world.createBody(bodyDef)..createFixture(fixtureDef);
   }
 
@@ -61,15 +70,35 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
   @override
   void update(double dt) {
     super.update(dt);
+
+    // update light position
+    if (playerLight != -1) {
+      (gameRef as LightsGame)
+          .lightState
+          .updateLight(playerLight, Light(body.position, Colors.white, 50, 3));
+    }
+  }
+
+  @override
+  void onMount() {
+    playerLight = (gameRef as LightsGame)
+        .lightState
+        .addLight(Light(body.position, Colors.white, 50, 3));
+    super.onMount();
+  }
+
+  @override
+  void onRemove() {
+    (gameRef as LightsGame).lightState.removeLight(playerLight);
+    super.onRemove();
   }
 
   void fire() {
     final spawnPoint = body.position.clone();
     final heading = (gameRef.mousePosition - spawnPoint);
     heading.normalize();
-    debugPrint(heading.toString());
     final bullet = BulletComponent.spawn(
-      position: spawnPoint,
+      startPosition: spawnPoint,
       heading: heading,
     );
     gameRef.add(bullet);

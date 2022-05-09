@@ -36,6 +36,11 @@ class ObstacleComponent extends BodyComponent {
       ..position = position
       ..type = BodyType.static
       ..userData = this;
+
+    paint = Paint()
+      ..color = Colors.pink
+      ..blendMode = BlendMode.multiply;
+
     return world.createBody(bodyDef)..createFixture(fixtureDef);
   }
 
@@ -56,7 +61,9 @@ class ObstacleComponent extends BodyComponent {
                 10,
             child: CircleParticle(
               radius: rnd.nextDouble(),
-              paint: Paint()..color = Colors.white,
+              paint: Paint()
+                ..color = Colors.pink
+                ..blendMode = BlendMode.multiply,
             ),
           ),
         ),

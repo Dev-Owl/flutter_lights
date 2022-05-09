@@ -1,7 +1,7 @@
 #version 320 es
 
 // inspired and derived from
-// https://www.shadertoy.com/view/4dfXDn
+// https://www.shadertoydsdd.com/view/4dfXDn
 
 precision highp float;
 
@@ -12,6 +12,10 @@ layout(location=0)uniform vec2 resolution;
 // data texture
 layout(location=3)uniform sampler2D dataSampler;
 layout(location=4)uniform vec2 dataSize;
+
+// light and obstacles to process
+layout(location=5)uniform float lightIndex;
+layout(location=6)uniform vec3 obstaclesIndex;// -1 is no obstacle
 
 // data retrieval from a texture
 vec4 getFloatsAt(vec2 position){
@@ -125,14 +129,18 @@ float fillMask(float dist)
 
 float sceneDist(vec2 p)
 {
-    vec4 box0=getBox(0.);
-    float m=boxDist(translate(p,box0.xy),box0.zw,0.);
-    float boxCount=boxCount();
-    for(float i=1.;i<=2.;i++){
-        if(i<boxCount){
-            vec4 box=getBox(i);
-            m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
-        }
+    float m=circleDist(translate(p,vec2(0.)),0.);
+    if(obstaclesIndex.x>-1.){
+        vec4 box=getBox(obstaclesIndex.x);
+        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+    }
+    if(obstaclesIndex.y>-1.){
+        vec4 box=getBox(obstaclesIndex.y);
+        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+    }
+    if(obstaclesIndex.z>-1.){
+        vec4 box=getBox(obstaclesIndex.z);
+        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
     }
     return m;
 }
@@ -232,16 +240,18 @@ void main(){
     
     float dist=sceneDist(p);
     
-    vec2 light1Pos=getLightPosition(0.);
-    vec4 light1Col=getLightColor(0.);
-    vec2 light1RangeAndRadius=getLightRangeAndRadius(0.);
+    vec2 light1Pos=getLightPosition(lightIndex);
+    vec4 light1Col=getLightColor(lightIndex);
+    vec2 light1RangeAndRadius=getLightRangeAndRadius(lightIndex);
     setLuminance(light1Col,.1);
     
     // gradient
-    vec4 col=vec4(.5,.5,.5,1.)*(1.-length(c-p)/resolution.x);
-    
+    //vec4 col=vec4(.4392,.4392,.4392,1.)*(1.-length(c-p)/resolution.x);
+    vec4 col=vec4(0.,0.,0.,1.);
+    // grid
+    // col*=clamp(min(mod(p.y,5.),mod(p.x,5.)),.9,1.);
     // ambient occlusion
-    col*=AO(p,sceneSmooth(p,10.),40.,.4);
+    //col*=AO(p,sceneSmooth(p,10.),40.,.4);
     
     // light
     col+=drawLight(p,light1Pos,light1Col,dist,light1RangeAndRadius.x,light1RangeAndRadius.y);

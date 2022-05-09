@@ -8,10 +8,14 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 import 'package:lights/game/components/player.dart';
 
+import '../game.dart';
+import '../lightState.dart';
+
 class EnemyComponent extends BodyComponent {
   final PlayerComponent playerComponent;
   final Vector2 spawnPoint;
   final double speed = 8 * 5;
+  int light = -1;
 
   EnemyComponent.spawn({
     required this.spawnPoint,
@@ -32,7 +36,20 @@ class EnemyComponent extends BodyComponent {
       ..position = spawnPoint
       ..type = BodyType.dynamic
       ..userData = this;
+
+    paint = Paint()
+      ..color = Colors.red
+      ..blendMode = BlendMode.multiply;
+
     return world.createBody(bodyDef)..createFixture(fixtureDef);
+  }
+
+  @override
+  void onMount() {
+    light = (gameRef as LightsGame)
+        .lightState
+        .addLight(Light(body.position, Colors.red, 50, 2));
+    super.onMount();
   }
 
   @override
@@ -43,6 +60,11 @@ class EnemyComponent extends BodyComponent {
     final velChange = (playerDirection * speed) - vel;
     velChange.scale(body.mass);
     body.applyLinearImpulse(velChange);
+
+    (gameRef as LightsGame)
+        .lightState
+        .updateLight(light, Light(body.position, Colors.red, 50, 2));
+
     super.update(dt);
   }
 
@@ -61,12 +83,16 @@ class EnemyComponent extends BodyComponent {
             to: randomVector2(),
             child: CircleParticle(
               radius: rnd.nextDouble(),
-              paint: Paint()..color = Colors.red,
+              paint: Paint()
+                ..color = Colors.red
+                ..blendMode = BlendMode.multiply,
             ),
           ),
         ),
       ),
     );
+
+    (gameRef as LightsGame).lightState.removeLight(light);
     super.onRemove();
   }
 }
