@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/palette.dart';
 import 'package:flame/particles.dart' as flame;
+import 'package:flame/particles.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 import 'package:lights/game/components/player.dart';
@@ -10,7 +11,7 @@ import 'package:lights/game/components/player.dart';
 class EnemyComponent extends BodyComponent {
   final PlayerComponent playerComponent;
   final Vector2 spawnPoint;
-  final double speed = 8;
+  final double speed = 8 * 5;
 
   EnemyComponent.spawn({
     required this.spawnPoint,
@@ -21,7 +22,7 @@ class EnemyComponent extends BodyComponent {
   Body createBody() {
     paint = BasicPalette.red.paint();
     final shape = CircleShape();
-    shape.radius = .5;
+    shape.radius = 2.5;
     final fixtureDef = FixtureDef(shape)
       ..restitution = 0.8
       ..density = 1.0
@@ -55,10 +56,11 @@ class EnemyComponent extends BodyComponent {
         position: body.position,
         particle: flame.Particle.generate(
           count: 25,
-          generator: (i) => flame.AcceleratedParticle(
-            acceleration: randomVector2(),
-            child: flame.CircleParticle(
-              radius: 0.1,
+          generator: (i) => MovingParticle(
+            curve: Curves.easeOutQuad,
+            to: randomVector2(),
+            child: CircleParticle(
+              radius: rnd.nextDouble(),
               paint: Paint()..color = Colors.red,
             ),
           ),

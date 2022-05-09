@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 import 'package:lights/game/callbacks/bullet_contact_callback.dart';
 import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/gun.dart';
@@ -13,7 +14,6 @@ import 'package:lights/game/lightState.dart';
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
   final FragmentProgram shaderProgram;
-  final Image lightImage;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
   LightState lightState = LightState();
@@ -21,7 +21,7 @@ class LightsGame extends Forge2DGame
 
   double enemySapwnIntervall = 2;
   double enemySapwnTime = 0;
-  LightsGame(this.shaderProgram, this.lightImage)
+  LightsGame(this.shaderProgram)
       : super(
           gravity: Vector2.zero(),
           zoom: 2.0,
@@ -52,8 +52,10 @@ class LightsGame extends Forge2DGame
   @override
   void onMouseMove(PointerHoverInfo info) {
     mousePosition = info.eventPosition.game;
-    mouseLight ??= lightState.addLight(Light(mousePosition));
-    lightState.updateLight(mouseLight!, Light(mousePosition));
+    mouseLight ??=
+        lightState.addLight(Light(mousePosition, Colors.blue.shade900, 150, 5));
+    lightState.updateLight(
+        mouseLight!, Light(mousePosition, Colors.blue.shade900, 150, 5));
     super.onMouseMove(info);
   }
 

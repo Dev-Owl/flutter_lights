@@ -35,8 +35,7 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
   @override
   void render(Canvas canvas) {
     canvas.drawRect(
-        Rect.fromLTWH(0, 0, gameRef.size.x / 2.0, gameRef.size.y / 2.0),
-        shaderPaint);
+        Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), shaderPaint);
   }
 
   List<int> encodeNumber(double value) {
@@ -95,7 +94,13 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
       var light = lightState.lights.values.toList()[i];
       writeNumber(bytes, currentCell, light.position.x);
       writeNumber(bytes, currentCell + 1, light.position.y);
-      currentCell += 2;
+      writeNumber(bytes, currentCell + 2, light.color.red.toDouble() / 256.0);
+      writeNumber(bytes, currentCell + 3, light.color.green.toDouble() / 256.0);
+      writeNumber(bytes, currentCell + 4, light.color.blue.toDouble() / 256.0);
+      writeNumber(bytes, currentCell + 5, light.color.alpha.toDouble());
+      writeNumber(bytes, currentCell + 6, light.range.toDouble());
+      writeNumber(bytes, currentCell + 7, light.radius.toDouble());
+      currentCell += 8;
     }
 
     return ui.decodeImageFromPixels(
@@ -109,12 +114,9 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
 
   Paint generatePaint() {
     var uniformFloats = <double>[];
-    final resolution = Vector2(gameRef.size.x / 2, gameRef.size.y / 2);
+    final resolution = Vector2(gameRef.size.x, gameRef.size.y);
     uniformFloats.add(resolution.x);
     uniformFloats.add(resolution.y);
-    // light texture size
-    uniformFloats.add(1024.0);
-    uniformFloats.add(1024.0);
     // data texture size
     uniformFloats.add(1024.0);
     uniformFloats.add(1024.0);
@@ -122,13 +124,12 @@ class ScreenComponent extends PositionComponent with HasGameRef<LightsGame> {
     final shader = gameRef.shaderProgram.shader(
       floatUniforms: Float32List.fromList(uniformFloats),
       samplerUniforms: <ImageShader>[
-        ImageShader(gameRef.lightImage, TileMode.repeated, TileMode.repeated,
-            Matrix4.identity().storage),
         ImageShader(dataImage, TileMode.repeated, TileMode.repeated,
             Matrix4.identity().storage),
       ],
     );
     final paint = Paint()..shader = shader;
+    paint.blendMode = BlendMode.lighten;
     return paint;
   }
 }

@@ -8,16 +8,10 @@ precision highp float;
 layout(location=0)out vec4 fragColor;
 
 layout(location=0)uniform vec2 resolution;
-layout(location=1)uniform sampler2D lightSampler;
-layout(location=2)uniform vec2 lightSize;
 
 // data texture
 layout(location=3)uniform sampler2D dataSampler;
 layout(location=4)uniform vec2 dataSize;
-
-vec4 sampleLight(vec2 position,float scale){
-    return texture(lightSampler,position.xy/(lightSize.xy*scale));
-}
 
 // data retrieval from a texture
 vec4 getFloatsAt(vec2 position){
@@ -60,11 +54,25 @@ vec4 getBox(float index){
 float lightCount(){
     return getNumber(boxCount()*4.+1.);
 }
-vec2 getLight(float index){
-    float indexOffset=(boxCount()*4.+2.)+index*2.;
+vec2 getLightPosition(float index){
+    float indexOffset=(boxCount()*4.+2.)+index*8.;
     float x=getNumber(indexOffset);
     float y=getNumber(indexOffset+1.);
     return vec2(x,y);
+}
+vec4 getLightColor(float index){
+    float indexOffset=(boxCount()*4.+2.)+index*8.;
+    float r=getNumber(indexOffset+2.);
+    float g=getNumber(indexOffset+3.);
+    float b=getNumber(indexOffset+4.);
+    float a=getNumber(indexOffset+5.);
+    return vec4(r,g,b,a);
+}
+vec2 getLightRangeAndRadius(float index){
+    float indexOffset=(boxCount()*4.+2.)+index*8.;
+    float range=getNumber(indexOffset+6.);
+    float radius=getNumber(indexOffset+7.);
+    return vec2(range,radius);
 }
 
 // actual lighting
@@ -224,8 +232,9 @@ void main(){
     
     float dist=sceneDist(p);
     
-    vec2 light1Pos=getLight(0.);
-    vec4 light1Col=vec4(.75,1.,.5,1.);
+    vec2 light1Pos=getLightPosition(0.);
+    vec4 light1Col=getLightColor(0.);
+    vec2 light1RangeAndRadius=getLightRangeAndRadius(0.);
     setLuminance(light1Col,.1);
     
     // gradient
@@ -235,7 +244,7 @@ void main(){
     col*=AO(p,sceneSmooth(p,10.),40.,.4);
     
     // light
-    col+=drawLight(p,light1Pos,light1Col,dist,150.,5.);
+    col+=drawLight(p,light1Pos,light1Col,dist,light1RangeAndRadius.x,light1RangeAndRadius.y);
     
     fragColor=clamp(col,0.,1.);
 }

@@ -29,7 +29,8 @@ class GunComponent extends PositionComponent with HasGameRef<LightsGame> {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(const Rect.fromLTWH(-0.2, 0, 0.4, 1.6), debugPaint);
+    canvas.drawRect(
+        const Rect.fromLTWH(-0.2 * 5, 0, 0.4 * 5, 1.6 * 5), debugPaint);
   }
 
   Vector2 _gunPosition() {

@@ -16,7 +16,7 @@ class BulletComponent extends BodyComponent {
     position = position + heading.scaled(1.0);
     paint = BasicPalette.blue.paint();
     final shape = PolygonShape();
-    shape.setAsBoxXY(0.1, 0.1);
+    shape.setAsBoxXY(0.5, 0.5);
     final fixtureDef = FixtureDef(shape)
       ..restitution = 0.8
       ..density = .1
@@ -34,7 +34,7 @@ class BulletComponent extends BodyComponent {
 
   @override
   void onMount() {
-    final impulse = heading * 35 * body.mass;
+    final impulse = heading * 35 * 5 * body.mass;
     body.applyLinearImpulse(impulse);
     super.onMount();
   }

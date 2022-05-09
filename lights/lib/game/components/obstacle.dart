@@ -48,17 +48,18 @@ class ObstacleComponent extends BodyComponent {
       ParticleSystemComponent(
         position: impactPoint,
         particle: flame.Particle.generate(
-            count: 10,
-            generator: (i) {
-              final acceleration = Vector2.random(rnd);
-              return AcceleratedParticle(
-                acceleration: (target.clone()..multiply(acceleration)) * 10,
-                child: flame.CircleParticle(
-                  radius: 0.1,
-                  paint: Paint()..color = Colors.red,
-                ),
-              );
-            }),
+          count: 10,
+          generator: (i) => MovingParticle(
+            curve: Curves.easeOutQuad,
+            to: (target.clone()
+                  ..multiply(Vector2(rnd.nextDouble(), rnd.nextDouble()))) *
+                10,
+            child: CircleParticle(
+              radius: rnd.nextDouble(),
+              paint: Paint()..color = Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }

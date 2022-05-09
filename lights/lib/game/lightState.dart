@@ -49,6 +49,9 @@ class LightObscurerBox {
 
 class Light {
   final Vector2 position;
+  final Color color;
+  final double range;
+  final double radius;
 
-  Light(this.position);
+  Light(this.position, this.color, this.range, this.radius);
 }

@@ -22,14 +22,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the shaders
-  final lightImage = await getUiImage('assets/textures/light.png', 1024, 1024);
   final program = await ui.FragmentProgram.compile(
     spirv: (await rootBundle.load('assets/shaders/lighting.frag.spv')).buffer,
     debugPrint: true,
   );
 
   await Flame.device.fullScreen();
-  final game = LightsGame(program, lightImage);
+  final game = LightsGame(program);
   runApp(MaterialApp(
     home: GameWidget(
       game: game,

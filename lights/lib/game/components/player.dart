@@ -10,7 +10,7 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
   @override
   Body createBody() {
     final shape = CircleShape();
-    shape.radius = 0.5;
+    shape.radius = 2.5;
     final fixtureDef = FixtureDef(shape)
       ..restitution = 0.8
       ..density = 1.0
@@ -29,7 +29,7 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
   bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     var desiredValueX = .0;
     var desiredValueY = .0;
-    const speed = 10;
+    const speed = 50;
     final vel = body.linearVelocity;
     var handled = false;
     if (keysPressed.isNotEmpty) {
