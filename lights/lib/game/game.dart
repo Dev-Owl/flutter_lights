@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutter/material.dart';
 import 'package:lights/game/callbacks/bullet_contact_callback.dart';
 import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/gun.dart';
@@ -20,33 +20,41 @@ class LightsGame extends Forge2DGame
   LightState lightState = LightState();
   int? mouseLight;
 
-  double enemySapwnIntervall = 2;
+  double enemySpawnInterval = 2;
   double enemySpawnTime = 0;
   LightsGame(this.shaderProgram)
       : super(
           gravity: Vector2.zero(),
-          zoom: 2.0,
+          zoom: 1.0,
         );
 
   @override
   Future<void>? onLoad() async {
     player = PlayerComponent();
     await add(LightingComponent());
-    // await add(
-    //     ObstacleComponent(position: Vector2(50, 100), size: Vector2.all(20)));
 
-    var obstacles = 40;
+    camera.viewport = FixedResolutionViewport(Vector2(400, 300));
+    camera.worldBounds = Rect.fromLTWH(
+        0,
+        0,
+        camera.viewport.effectiveSize.x * 2,
+        camera.viewport.effectiveSize.y * 2);
+
+    var obstacles = 15;
     // spawn random obstacles around the map
     var rnd = Random();
     for (var i = 0; i < obstacles; i++) {
-      var x = rnd.nextDouble() * size.x;
-      var y = rnd.nextDouble() * size.y;
+      var x = rnd.nextDouble() *
+          (camera.viewport as FixedResolutionViewport).effectiveSize.x;
+      var y = rnd.nextDouble() *
+          (camera.viewport as FixedResolutionViewport).effectiveSize.y;
 
       var boxSize = Vector2(rnd.nextDouble() * 20, rnd.nextDouble() * 20);
       await add(ObstacleComponent(position: Vector2(x, y), size: boxSize));
     }
 
     await add(player);
+    camera.followBodyComponent(player);
 
     await add(GunComponent(player));
     await add(EnemyComponent.spawn(
@@ -76,7 +84,7 @@ class LightsGame extends Forge2DGame
   @override
   void update(double dt) {
     enemySpawnTime += dt;
-    if (enemySapwnIntervall <= enemySpawnTime) {
+    if (enemySpawnInterval <= enemySpawnTime) {
       add(EnemyComponent.spawn(
           spawnPoint: Vector2(-10, 0), playerComponent: player));
 
