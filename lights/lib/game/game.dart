@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' as flutter_rendering;
 import 'package:lights/game/callbacks/bullet_contact_callback.dart';
 import 'package:lights/game/components/enemy.dart';
 import 'package:lights/game/components/obstacle.dart';
@@ -12,7 +14,14 @@ import 'package:lights/game/components/lighting.dart';
 import 'package:lights/game/lightState.dart';
 
 class LightsGame extends Forge2DGame
-    with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
+    with
+        HasKeyboardHandlerComponents,
+        MouseMovementDetector,
+        TapDetector,
+        FPSCounter {
+  static final fpsTextPaint = TextPaint(
+    style: const flutter_rendering.TextStyle(color: Colors.white, fontSize: 18),
+  );
   final FragmentProgram shaderProgram;
   final double physicsScale = 10.0;
   late final PlayerComponent player;
@@ -93,6 +102,12 @@ class LightsGame extends Forge2DGame
 
     camera.followVector2(player.scaledPosition);
     super.update(dt);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    fpsTextPaint.render(canvas, fps(120).toString(), Vector2(100, 100));
   }
 
   Vector2 worldToPhysics(Vector2 world) {
