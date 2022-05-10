@@ -5,22 +5,28 @@ import 'package:flame/particles.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flame/particles.dart' as flame;
 import 'package:flutter/material.dart';
+import 'package:lights/game/decoupledBody.dart';
 import 'package:lights/game/game.dart';
 import 'package:lights/game/lightState.dart';
 
-class ObstacleComponent extends BodyComponent {
+class ObstacleComponent extends DecoupledBodyComponent<LightsGame> {
   final Vector2 position;
   final Vector2 size;
-  late LightsGame game;
   late int obscurerId;
 
   ObstacleComponent({required this.position, required this.size});
 
   @override
   Future<void> onLoad() async {
-    game = gameRef as LightsGame;
-    obscurerId = game.lightState.addBox(LightObscurerBox(position, size));
+    obscurerId = gameRef.lightState.addBox(LightObscurerBox(
+        gameRef.physicsToWorld(position), gameRef.physicsToWorld(size)));
     super.onLoad();
+  }
+
+  @override
+  void onRemove() {
+    gameRef.lightState.removeBox(obscurerId);
+    super.onRemove();
   }
 
   @override
@@ -45,13 +51,13 @@ class ObstacleComponent extends BodyComponent {
   }
 
   void impact(Vector2 direction, Vector2 impactPoint, Vector2 normal) {
-    final target = direction.normalized().reflected(normal).normalized();
-
+    final target = gameRef
+        .physicsToWorld(direction.normalized().reflected(normal).normalized());
     final rnd = Random();
 
     gameRef.add(
       ParticleSystemComponent(
-        position: impactPoint,
+        position: gameRef.physicsToWorld(impactPoint),
         particle: flame.Particle.generate(
           count: 10,
           generator: (i) => MovingParticle(
@@ -60,7 +66,7 @@ class ObstacleComponent extends BodyComponent {
                   ..multiply(Vector2(rnd.nextDouble(), rnd.nextDouble()))) *
                 10,
             child: CircleParticle(
-              radius: rnd.nextDouble(),
+              radius: gameRef.physicsScale * rnd.nextDouble(),
               paint: Paint()
                 ..color = Colors.pink
                 ..blendMode = BlendMode.multiply,

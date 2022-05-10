@@ -1,13 +1,17 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lights/game/components/bullet.dart';
+import 'package:lights/game/decoupledBody.dart';
 import 'package:lights/game/game.dart';
 
 import '../lightState.dart';
 
-class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
+class PlayerComponent extends DecoupledBodyComponent<LightsGame>
+    with KeyboardHandler {
   int playerLight = -1;
 
   /// Create body for our player
@@ -73,23 +77,28 @@ class PlayerComponent extends BodyComponent<LightsGame> with KeyboardHandler {
 
     // update light position
     if (playerLight != -1) {
-      (gameRef as LightsGame)
-          .lightState
-          .updateLight(playerLight, Light(body.position, Colors.white, 50, 3));
+      final time = gameRef.currentTime();
+      final wave = (sin(time) + 3) / 4 +
+          (sin(time * 10) * 0.03) +
+          (sin(time * 30) * 0.025) +
+          (sin(time * 100) * 0.01);
+      gameRef.lightState.updateLight(
+          playerLight,
+          Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), wave * 300,
+              15));
     }
   }
 
   @override
   void onMount() {
-    playerLight = (gameRef as LightsGame)
-        .lightState
-        .addLight(Light(body.position, Colors.white, 50, 3));
+    playerLight = gameRef.lightState.addLight(
+        Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), 300, 15));
     super.onMount();
   }
 
   @override
   void onRemove() {
-    (gameRef as LightsGame).lightState.removeLight(playerLight);
+    gameRef.lightState.removeLight(playerLight);
     super.onRemove();
   }
 

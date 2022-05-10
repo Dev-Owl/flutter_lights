@@ -4,11 +4,12 @@ import 'package:flame/extensions.dart';
 import 'package:flame/palette.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
+import 'package:lights/game/decoupledBody.dart';
 import 'package:lights/game/game.dart';
 
 import '../lightState.dart';
 
-class BulletComponent extends BodyComponent {
+class BulletComponent extends DecoupledBodyComponent<LightsGame> {
   int lightIndex = -1;
   Vector2 startPosition;
   Vector2 heading;
@@ -21,13 +22,13 @@ class BulletComponent extends BodyComponent {
   @override
   Body createBody() {
     startPosition = startPosition + heading.scaled(3.0);
-    final shape = PolygonShape();
-    shape.setAsBoxXY(0.5, 0.5);
+    final shape = CircleShape();
+    shape.radius = 0.5;
 
     final fixtureDef = FixtureDef(shape)
       ..restitution = 0.8
-      ..density = .1
-      ..friction = 0.2;
+      ..density = .01
+      ..friction = 0;
 
     final bodyDef = BodyDef()
       ..position = startPosition
@@ -46,29 +47,32 @@ class BulletComponent extends BodyComponent {
 
   @override
   void onMount() {
-    lightIndex = (gameRef as LightsGame)
-        .lightState
-        .addLight(Light(body.position, Colors.orange, 50, 2));
+    lightIndex = gameRef.lightState.addLight(Light(
+        gameRef.physicsToWorld(body.position),
+        Color.fromARGB(255, 158, 95, 0),
+        300,
+        15));
 
-    final impulse = heading * 35 * 5 * 4 * body.mass;
+    final impulse = heading * body.mass * 1000;
     body.applyLinearImpulse(impulse);
     super.onMount();
   }
 
   @override
   void onRemove() {
-    (gameRef as LightsGame).lightState.removeLight(lightIndex);
+    gameRef.lightState.removeLight(lightIndex);
     super.onRemove();
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    (gameRef as LightsGame)
-        .lightState
-        .updateLight(lightIndex, Light(body.position, Colors.orange, 50, 2));
-    final rect = Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y);
+    gameRef.lightState.updateLight(
+        lightIndex,
+        Light(gameRef.physicsToWorld(body.position),
+            Color.fromARGB(255, 158, 95, 0), 300, 15));
 
+    final rect = gameRef.camera.worldBounds!;
     if (rect.containsPoint(body.position) == false) {
       removeFromParent();
     }

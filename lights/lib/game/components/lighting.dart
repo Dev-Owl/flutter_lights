@@ -5,8 +5,6 @@ import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/image_composition.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:lights/game/components/player.dart';
 import 'package:lights/game/game.dart';
 
 class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
@@ -28,6 +26,7 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
     generateDataImage((image) {
       dataImage = image;
     });
+    position = gameRef.camera.position;
     super.update(dt);
   }
 
@@ -41,17 +40,21 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
     // x - increment between 0 and 255
     // y - increment between 0 and 255
     // z - the remainder between 0 and 255
-    // so the resulting number is (x * 256) + (y * 256) + z
+    // so the resulting number is (x * 256) + (y * 256 * 256) + z
     final valueInt = (value * 10.0).toInt();
     final increment = valueInt ~/ 256;
     final remainder = valueInt - (increment * 256);
-    final x = increment > 255 ? 255 : increment;
-    final y = increment - x;
+
+    final y = increment ~/ 256;
+    final x = increment - (y * 256);
+
     if (y > 255) {
       throw Exception('y is too large');
     }
-    final z = remainder;
-    return [x, y, z];
+    if ((x * 256.0) + (y * 256.0 * 256.0) + remainder != valueInt) {
+      throw Exception('calculation is wrong');
+    }
+    return [x, y, remainder];
   }
 
   // cell is 4 bytes
@@ -116,7 +119,7 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
 
     // ambient lighting
     var ambientPaint = Paint()
-      ..color = Colors.white12
+      ..color = ui.Color.fromARGB(17, 255, 255, 255)
       ..blendMode = ui.BlendMode.src;
     canvas.drawRect(
         Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), ambientPaint);
@@ -133,7 +136,8 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
       uniformFloats.add(currentLightIndex);
       // find boxes which intersect the light's circle (position and range)
       final light = lightKeyValue.value;
-      final lightRange = light.range;
+      final lightRange =
+          light.range * 1.5; // seems the engine overshoots a little
       final lightPosition = light.position;
 
       double currentBoxIndex = 0;
@@ -148,16 +152,10 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
         var boxBottomLeft = boxPosition + Vector2(0, boxSize.y) - boxSize / 2;
         var boxBottomRight = boxPosition + boxSize - boxSize / 2;
 
-        if (circleIntersectsPoint(lightPosition, lightRange, boxTopLeft)) {
-          intersectingBoxes.add(currentBoxIndex);
-        } else if (circleIntersectsPoint(
-            lightPosition, lightRange, boxTopRight)) {
-          intersectingBoxes.add(currentBoxIndex);
-        } else if (circleIntersectsPoint(
-            lightPosition, lightRange, boxBottomLeft)) {
-          intersectingBoxes.add(currentBoxIndex);
-        } else if (circleIntersectsPoint(
-            lightPosition, lightRange, boxBottomRight)) {
+        if (circleIntersectsPoint(lightPosition, lightRange, boxTopLeft) ||
+            circleIntersectsPoint(lightPosition, lightRange, boxTopRight) ||
+            circleIntersectsPoint(lightPosition, lightRange, boxBottomLeft) ||
+            circleIntersectsPoint(lightPosition, lightRange, boxBottomRight)) {
           intersectingBoxes.add(currentBoxIndex);
         }
 
@@ -173,6 +171,10 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
           uniformFloats.add(-1.0);
         }
       }
+
+      // put camera position in uniform floats
+      uniformFloats.add(gameRef.camera.position.x);
+      uniformFloats.add(gameRef.camera.position.y);
 
       final shader = gameRef.shaderProgram.shader(
         floatUniforms: Float32List.fromList(uniformFloats),

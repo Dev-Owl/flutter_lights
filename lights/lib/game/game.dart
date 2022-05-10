@@ -6,7 +6,6 @@ import 'package:flame/input.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:lights/game/callbacks/bullet_contact_callback.dart';
 import 'package:lights/game/components/enemy.dart';
-import 'package:lights/game/components/gun.dart';
 import 'package:lights/game/components/obstacle.dart';
 import 'package:lights/game/components/player.dart';
 import 'package:lights/game/components/lighting.dart';
@@ -15,6 +14,7 @@ import 'package:lights/game/lightState.dart';
 class LightsGame extends Forge2DGame
     with HasKeyboardHandlerComponents, MouseMovementDetector, TapDetector {
   final FragmentProgram shaderProgram;
+  final double physicsScale = 10.0;
   late final PlayerComponent player;
   Vector2 mousePosition = Vector2.zero();
   LightState lightState = LightState();
@@ -33,30 +33,22 @@ class LightsGame extends Forge2DGame
     player = PlayerComponent();
     await add(LightingComponent());
 
-    camera.viewport = FixedResolutionViewport(Vector2(400, 300));
-    camera.worldBounds = Rect.fromLTWH(
-        0,
-        0,
-        camera.viewport.effectiveSize.x * 2,
-        camera.viewport.effectiveSize.y * 2);
+    camera.worldBounds =
+        Rect.fromLTWH(0, 0, 1920 * physicsScale, 1080 * physicsScale);
 
-    var obstacles = 15;
+    var obstacles = 400;
     // spawn random obstacles around the map
     var rnd = Random();
     for (var i = 0; i < obstacles; i++) {
-      var x = rnd.nextDouble() *
-          (camera.viewport as FixedResolutionViewport).effectiveSize.x;
-      var y = rnd.nextDouble() *
-          (camera.viewport as FixedResolutionViewport).effectiveSize.y;
+      var x = rnd.nextDouble() * camera.worldBounds!.size.width;
+      var y = rnd.nextDouble() * camera.worldBounds!.size.height;
+      var position = worldToPhysics(Vector2(x, y));
 
       var boxSize = Vector2(rnd.nextDouble() * 20, rnd.nextDouble() * 20);
-      await add(ObstacleComponent(position: Vector2(x, y), size: boxSize));
+      await add(ObstacleComponent(position: position, size: boxSize));
     }
 
     await add(player);
-    camera.followBodyComponent(player);
-
-    await add(GunComponent(player));
     await add(EnemyComponent.spawn(
         spawnPoint: Vector2(-10, 0), playerComponent: player));
     addContactCallback(BulletObstacleContctCallback());
@@ -68,7 +60,7 @@ class LightsGame extends Forge2DGame
 
   @override
   void onMouseMove(PointerHoverInfo info) {
-    mousePosition = info.eventPosition.game;
+    mousePosition = worldToPhysics(info.eventPosition.game);
     // mouseLight ??=
     //     lightState.addLight(Light(mousePosition, Colors.white, 150, 5));
     // lightState.updateLight(
@@ -90,6 +82,16 @@ class LightsGame extends Forge2DGame
 
       enemySpawnTime = 0;
     }
+
+    camera.followVector2(player.scaledPosition);
     super.update(dt);
+  }
+
+  Vector2 worldToPhysics(Vector2 world) {
+    return world / physicsScale;
+  }
+
+  Vector2 physicsToWorld(Vector2 physics) {
+    return physics * physicsScale;
   }
 }

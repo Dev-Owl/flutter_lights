@@ -7,14 +7,15 @@ import 'package:flame/particles.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 import 'package:lights/game/components/player.dart';
+import 'package:lights/game/decoupledBody.dart';
 
 import '../game.dart';
 import '../lightState.dart';
 
-class EnemyComponent extends BodyComponent {
+class EnemyComponent extends DecoupledBodyComponent<LightsGame> {
   final PlayerComponent playerComponent;
   final Vector2 spawnPoint;
-  final double speed = 8 * 5;
+  double speed = 40;
   int light = -1;
 
   EnemyComponent.spawn({
@@ -25,6 +26,8 @@ class EnemyComponent extends BodyComponent {
   @override
   Body createBody() {
     paint = BasicPalette.red.paint();
+
+    // Physics
     final shape = CircleShape();
     shape.radius = 2.5;
     final fixtureDef = FixtureDef(shape)
@@ -46,9 +49,8 @@ class EnemyComponent extends BodyComponent {
 
   @override
   void onMount() {
-    light = (gameRef as LightsGame)
-        .lightState
-        .addLight(Light(body.position, Colors.red, 50, 2));
+    light = gameRef.lightState.addLight(
+        Light(scaledPosition, Color.fromARGB(255, 133, 36, 29), 300, 20));
     super.onMount();
   }
 
@@ -61,9 +63,8 @@ class EnemyComponent extends BodyComponent {
     velChange.scale(body.mass);
     body.applyLinearImpulse(velChange);
 
-    (gameRef as LightsGame)
-        .lightState
-        .updateLight(light, Light(body.position, Colors.red, 50, 2));
+    gameRef.lightState.updateLight(light,
+        Light(scaledPosition, Color.fromARGB(255, 133, 36, 29), 300, 20));
 
     super.update(dt);
   }
@@ -73,18 +74,26 @@ class EnemyComponent extends BodyComponent {
   Vector2 randomVector2() => (Vector2.random(rnd) - Vector2.random(rnd)) * 20;
   @override
   void onRemove() {
+    final target = -gameRef.physicsToWorld(
+        (gameRef.player.body.position - body.position).normalized() * 2.0);
+    final rnd = Random();
+    final splatterAmount = 7.0;
+
     gameRef.add(
       ParticleSystemComponent(
-        position: body.position,
+        position: gameRef.physicsToWorld(body.position),
         particle: flame.Particle.generate(
           count: 25,
           generator: (i) => MovingParticle(
             curve: Curves.easeOutQuad,
-            to: randomVector2(),
+            to: (target.clone() * 10) +
+                gameRef.physicsToWorld(Vector2(
+                    rnd.nextDouble() * splatterAmount,
+                    rnd.nextDouble() * splatterAmount)),
             child: CircleParticle(
-              radius: rnd.nextDouble(),
+              radius: gameRef.physicsScale * rnd.nextDouble(),
               paint: Paint()
-                ..color = Colors.red
+                ..color = Colors.pink
                 ..blendMode = BlendMode.multiply,
             ),
           ),
@@ -92,7 +101,7 @@ class EnemyComponent extends BodyComponent {
       ),
     );
 
-    (gameRef as LightsGame).lightState.removeLight(light);
+    gameRef.lightState.removeLight(light);
     super.onRemove();
   }
 }

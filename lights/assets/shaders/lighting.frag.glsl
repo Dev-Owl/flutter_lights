@@ -16,6 +16,7 @@ layout(location=4)uniform vec2 dataSize;
 // light and obstacles to process
 layout(location=5)uniform float lightIndex;
 layout(location=6)uniform vec3 obstaclesIndex;// -1 is no obstacle
+layout(location=7)uniform vec2 cameraPosition;
 
 // data retrieval from a texture
 vec4 getFloatsAt(vec2 position){
@@ -26,7 +27,7 @@ vec4 getBytesAt(vec2 position){
 }
 float getNumberAt(vec2 position){
     vec4 bytes=getBytesAt(position);
-    return(bytes.r*256.+bytes.g*256.+bytes.b)/10.;
+    return((bytes.r*256.)+(bytes.g*256.*256.)+bytes.b)/10.;
 }
 float positionToIndex(vec2 position){
     return position.x+position.y*dataSize.x;
@@ -132,15 +133,15 @@ float sceneDist(vec2 p)
     float m=circleDist(translate(p,vec2(0.)),0.);
     if(obstaclesIndex.x>-1.){
         vec4 box=getBox(obstaclesIndex.x);
-        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+        m=merge(m,boxDist(translate(p,box.xy-cameraPosition),box.zw,0.));
     }
     if(obstaclesIndex.y>-1.){
         vec4 box=getBox(obstaclesIndex.y);
-        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+        m=merge(m,boxDist(translate(p,box.xy-cameraPosition),box.zw,0.));
     }
     if(obstaclesIndex.z>-1.){
         vec4 box=getBox(obstaclesIndex.z);
-        m=merge(m,boxDist(translate(p,box.xy),box.zw,0.));
+        m=merge(m,boxDist(translate(p,box.xy-cameraPosition),box.zw,0.));
     }
     return m;
 }
@@ -209,8 +210,9 @@ vec4 drawLight(vec2 p,vec2 pos,vec4 color,float dist,float range,float radius)
     float shad=shadow(p,pos,radius);
     float fall=(range-ld)/range;
     fall*=fall;
-    float source=fillMask(circleDist(p-pos,radius));
-    return(shad*fall+source)*color;
+    //float source=fillMask(circleDist(p-pos,radius));
+    return(shad*fall/*+source*/)*color;
+    // return color;
 }
 
 float luminance(vec4 col)
@@ -241,6 +243,7 @@ void main(){
     float dist=sceneDist(p);
     
     vec2 light1Pos=getLightPosition(lightIndex);
+    light1Pos=light1Pos-cameraPosition;
     vec4 light1Col=getLightColor(lightIndex);
     vec2 light1RangeAndRadius=getLightRangeAndRadius(lightIndex);
     setLuminance(light1Col,.1);
