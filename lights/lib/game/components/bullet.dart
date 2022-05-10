@@ -47,11 +47,8 @@ class BulletComponent extends DecoupledBodyComponent<LightsGame> {
 
   @override
   void onMount() {
-    lightIndex = gameRef.lightState.addLight(Light(
-        gameRef.physicsToWorld(body.position),
-        Color.fromARGB(255, 158, 95, 0),
-        300,
-        15));
+    lightIndex = gameRef.lightState.addLight(
+        Light(gameRef.physicsToWorld(body.position), Colors.orange, 70, 15));
 
     final impulse = heading * body.mass * 1000;
     body.applyLinearImpulse(impulse);
@@ -67,10 +64,8 @@ class BulletComponent extends DecoupledBodyComponent<LightsGame> {
   @override
   void update(double dt) {
     super.update(dt);
-    gameRef.lightState.updateLight(
-        lightIndex,
-        Light(gameRef.physicsToWorld(body.position),
-            Color.fromARGB(255, 158, 95, 0), 300, 15));
+    gameRef.lightState.updateLight(lightIndex,
+        Light(gameRef.physicsToWorld(body.position), Colors.orange, 70, 15));
 
     final rect = gameRef.camera.worldBounds!;
     if (rect.containsPoint(body.position) == false) {

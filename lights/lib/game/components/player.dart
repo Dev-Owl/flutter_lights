@@ -84,7 +84,7 @@ class PlayerComponent extends DecoupledBodyComponent<LightsGame>
           (sin(time * 100) * 0.01);
       gameRef.lightState.updateLight(
           playerLight,
-          Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), wave * 300,
+          Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), wave * 500,
               15));
     }
   }
@@ -92,7 +92,7 @@ class PlayerComponent extends DecoupledBodyComponent<LightsGame>
   @override
   void onMount() {
     playerLight = gameRef.lightState.addLight(
-        Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), 300, 15));
+        Light(scaledPosition, Color.fromARGB(255, 187, 145, 29), 500, 15));
     super.onMount();
   }
 

@@ -119,7 +119,7 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
 
     // ambient lighting
     var ambientPaint = Paint()
-      ..color = ui.Color.fromARGB(17, 255, 255, 255)
+      ..color = ui.Color.fromARGB(3, 255, 255, 255)
       ..blendMode = ui.BlendMode.src;
     canvas.drawRect(
         Rect.fromLTWH(0, 0, gameRef.size.x, gameRef.size.y), ambientPaint);
@@ -164,6 +164,11 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
 
       // take first three and add to uniform floats
       // place -1 if not enough to fill all 3 slots
+      intersectingBoxes.sort((a, b) => gameRef.lightState.boxes[a]!
+          .center()
+          .distanceTo(lightPosition)
+          .compareTo(
+              gameRef.lightState.boxes[b]!.center().distanceTo(lightPosition)));
       for (var i = 0; i < 3; i++) {
         if (i < intersectingBoxes.length) {
           uniformFloats.add(intersectingBoxes[i]);

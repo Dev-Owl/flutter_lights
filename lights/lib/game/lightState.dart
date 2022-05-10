@@ -45,6 +45,10 @@ class LightObscurerBox {
   final Vector2 size;
 
   LightObscurerBox(this.position, this.size);
+
+  Vector2 center() {
+    return position + size / 2;
+  }
 }
 
 class Light {
