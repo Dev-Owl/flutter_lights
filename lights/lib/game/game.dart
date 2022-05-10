@@ -76,9 +76,17 @@ class LightsGame extends Forge2DGame
   @override
   void update(double dt) {
     enemySpawnTime += dt;
+    final rnd = Random();
     if (enemySpawnInterval <= enemySpawnTime) {
+      // spawn an enemy somewhere outside of screen
+      final spawnOffset = Vector2(
+            rnd.nextDouble() * 2 - 1,
+            rnd.nextDouble() * 2 - 1,
+          ) *
+          max(size.x, size.y);
       add(EnemyComponent.spawn(
-          spawnPoint: Vector2(-10, 0), playerComponent: player));
+          spawnPoint: player.body.position + worldToPhysics(spawnOffset),
+          playerComponent: player));
 
       enemySpawnTime = 0;
     }

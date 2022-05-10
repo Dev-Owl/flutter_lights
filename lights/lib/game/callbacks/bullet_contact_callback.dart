@@ -15,7 +15,13 @@ class BulletEnemyContctCallback
   ) {
     contact.setEnabled(false);
     a.removeFromParent();
-    b.removeFromParent();
+
+    b.health -= 35;
+    b.splatter(b.gameRef.player.body.position);
+    if (b.health < 0) {
+      b.removeFromParent();
+      b.splatter(b.gameRef.player.body.position, count: 60, spread: 15.0);
+    }
   }
 }
 

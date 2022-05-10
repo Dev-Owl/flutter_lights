@@ -15,8 +15,9 @@ import '../lightState.dart';
 class EnemyComponent extends DecoupledBodyComponent<LightsGame> {
   final PlayerComponent playerComponent;
   final Vector2 spawnPoint;
-  double speed = 40;
+  double speed = 20;
   int light = -1;
+  int health = 100;
 
   EnemyComponent.spawn({
     required this.spawnPoint,
@@ -69,27 +70,27 @@ class EnemyComponent extends DecoupledBodyComponent<LightsGame> {
     super.update(dt);
   }
 
-  final rnd = Random();
-
-  Vector2 randomVector2() => (Vector2.random(rnd) - Vector2.random(rnd)) * 20;
   @override
   void onRemove() {
-    final target = -gameRef.physicsToWorld(
-        (gameRef.player.body.position - body.position).normalized() * 2.0);
+    gameRef.lightState.removeLight(light);
+    super.onRemove();
+  }
+
+  void splatter(Vector2 from, {int count = 25, double spread = 7.0}) {
+    final target =
+        -gameRef.physicsToWorld((from - body.position).normalized() * 2.0);
     final rnd = Random();
-    final splatterAmount = 7.0;
 
     gameRef.add(
       ParticleSystemComponent(
         position: gameRef.physicsToWorld(body.position),
         particle: flame.Particle.generate(
-          count: 25,
+          count: count,
           generator: (i) => MovingParticle(
             curve: Curves.easeOutQuad,
             to: (target.clone() * 10) +
                 gameRef.physicsToWorld(Vector2(
-                    rnd.nextDouble() * splatterAmount,
-                    rnd.nextDouble() * splatterAmount)),
+                    rnd.nextDouble() * spread, rnd.nextDouble() * spread)),
             child: CircleParticle(
               radius: gameRef.physicsScale * rnd.nextDouble(),
               paint: Paint()
@@ -100,8 +101,5 @@ class EnemyComponent extends DecoupledBodyComponent<LightsGame> {
         ),
       ),
     );
-
-    gameRef.lightState.removeLight(light);
-    super.onRemove();
   }
 }
