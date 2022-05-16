@@ -6,18 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lights/game/game.dart';
 
-Future<ui.Image> getUiImage(
-    String imageAssetPath, int height, int width) async {
-  final ByteData assetImageByteData = await rootBundle.load(imageAssetPath);
-  final codec = await ui.instantiateImageCodec(
-    assetImageByteData.buffer.asUint8List(),
-    targetHeight: height,
-    targetWidth: width,
-  );
-  final image = (await codec.getNextFrame()).image;
-  return image;
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

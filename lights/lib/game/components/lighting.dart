@@ -40,7 +40,7 @@ class LightingComponent extends PositionComponent with HasGameRef<LightsGame> {
     // x - increment between 0 and 255
     // y - increment between 0 and 255
     // z - the remainder between 0 and 255
-    // so the resulting number is (x * 256) + (y * 256 * 256) + z
+    // so the resulting number is ((x * 256) + (y * 256 * 256) + z) / 10
     final valueInt = (value * 10.0).toInt();
     final increment = valueInt ~/ 256;
     final remainder = valueInt - (increment * 256);
