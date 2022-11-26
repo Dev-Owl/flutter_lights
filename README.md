@@ -1,6 +1,6 @@
 # PLEASE READ ME
 * The code (very likely) will not work with the current stable version of Flutter
-* The code is by far not ready for production or was tested probably
+* The code is by far not ready for production or was tested properly
 * We created this as a quick demo/hack once the first shader support was added to Flutter early 2022
 * We do not plan to work on this, feel free to experiment with the code
 * The code was published because member of the Flutter/Flame Community have requested it
